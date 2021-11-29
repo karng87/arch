@@ -10,19 +10,19 @@
 
 ##### timedatectl set-ntp true
 ##### lsblk
-##### fdisk /dev/sda
+##### fdisk /dev/sdb
 # g (gpi)
 # n (new) -> +500M
 # t (type) -> select partision -> 1 (efi system)
 # n (hda)
 # n (swap)
 
-##### mkfs.fat -F32 /dev/sda1
-##### mffs.ext4 /dev/sda2
-##### mkswap /dev/sda3; mkswapon /dev/sda3
-##### mount /dev/sda2 /mnt
+##### mkfs.fat -F32 /dev/sdb1
+##### mffs.ext4 /dev/sdb2
+##### mkswap /dev/sdb3; mkswapon /dev/sdb3
+##### mount /dev/sdb2 /mnt
 ##### mkdir /mnt/boot
-##### mount /dev/sda1 /mnt/boot
+##### mount /dev/sdb1 /mnt/boot
 ##### pacstrap /mnt base linux linux-firmware vim git
 ##### genfstab -U /mnt >> /mnt/etc/fstab
 ##### arch-chroot /mnt
@@ -49,29 +49,26 @@ echo root:8755 | chpasswd
 # You can add xorg to the installation packages, I usually add it at the DE or WM install script
 # You can remove the tlp package if you are installing on a desktop or vm
 
-pacman -S refind-efi efibootmgr networkmanager network-manager-applet wireless_tools dialog wpa_supplicant mtools dosfstools reflector base-devel linux-headers 
+pacman -S refind networkmanager network-manager-applet wireless_tools dialog wpa_supplicant mtools dosfstools reflector base-devel linux-headers 
 
-pacman -S avahi xdg-user-dirs xdg-utils gvfs gvfs-smb nfs-utils inetutils dnsutils bluez bluez-utils cups hplip alsa-utils pulseaudio xorg pavucontrol bash-completion openssh rsync reflector acpi acpi_call tlp virt-manager qemu qemu-arch-extra edk2-ovmf bridge-utils dnsmasq vde2 openbsd-netcat iptables-nft ipset firewalld flatpak sof-firmware nss-mdns acpid os-prober ntfs-3g terminus-font
+pacman -S avahi xdg-user-dirs xdg-utils gvfs gvfs-smb nfs-utils inetutils dnsutils bluez bluez-utils cups hplip alsa-utils pulseaudio pavucontrol bash-completion openssh rsync reflector acpi acpi_call tlp virt-manager qemu qemu-arch-extra edk2-ovmf bridge-utils dnsmasq vde2 openbsd-netcat iptables-nft ipset firewalld flatpak sof-firmware nss-mdns acpid os-prober ntfs-3g terminus-font
 
-pacman -S --noconfirm xf86-video-intel
-#pacman -S --noconfirm xf86-video-amdgpu
+pacman -S xf86-video-intel
 #pacman -S --noconfirm nvidia nvidia-utils nvidia-settings
+#pacman -S --noconfirm xf86-video-amdgpu
 
 #########################
 ###### refind ###########
 #########################
 
-refind-install --usedefault /dev/sda1 --alldrivers
+refind-install --usedefault /dev/sdb1 --alldrivers
 mkrlconf
-cd /boot
-vim refind_linux.conf
+vim /boot/refind_linux.conf
 ### delete 1 2 line and left last line
-##### "Boot with minal options" "ro root=/dev/sda2"
-cd EFI
-cd BOOT
-vi refind.conf
+##### "Boot with minal options" "ro root=/dev/sdb2"
+vim /boot/EFI/BOOT/refind.conf
 ### search arch
-### replace uuid with "root=/dev/sda1 ..."
+### replace uuid with "root=/dev/sdb1 ..."
 ###########################################
 
 ### grub ######
@@ -94,8 +91,6 @@ systemctl enable acpid
 useradd -mG wheel jkarng
 echo jkarng:8755 | chpasswd
 
-#usermod -aG wheel libvirt video audio tty input jkarng
+usermod -aG wheel libvirt video audio tty input jkarng
 
 echo "jkarng ALL=(ALL) ALL" >> /etc/sudoers.d/jkarng
-
-printf "\e[1;32mDone! Type exit, umount -a and reboot.\e[0m"
